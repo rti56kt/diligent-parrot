@@ -5,7 +5,14 @@ import (
 )
 
 var (
+	// Importable global logrus logger instance.
 	Logger *logrus.Logger = logrus.New()
-	Debug  logrus.Level   = logrus.DebugLevel
-	Info   logrus.Level   = logrus.InfoLevel
+
+	// DebugLevel level. Usually only enabled when debugging.
+	// Very verbose logging. (logrus.Level = 5)
+	Debug logrus.Level = logrus.DebugLevel
+
+	// InfoLevel level. General operational entries about what's
+	// going on inside the application. (logrus.Level = 4)
+	Info logrus.Level = logrus.InfoLevel
 )

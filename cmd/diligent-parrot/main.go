@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
+	"github.com/rti56kt/diligent-parrot/pkg/msgresponder"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -19,7 +20,7 @@ var (
 )
 
 func init() {
-	flag.BoolVar(&logVerbose, "l", false, "Log level (false:INFO true:DEBUG)")
+	flag.BoolVar(&logVerbose, "v", false, "Log verbose (false:INFO true:DEBUG)")
 	flag.Parse()
 
 	loggerSet()
@@ -90,17 +91,41 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	var prefix string = "$"
+	var authorTag string = "<@!" + m.Author.ID + ">"
+	// Detect prefix to determine if the msg is a cmd
 	m.Content = strings.ToLower(m.Content)
 	if strings.HasPrefix(m.Content, prefix) {
 		m.Content = strings.TrimPrefix(m.Content, prefix)
 	} else {
-		return
+		if resp, exist := msgresponder.GetKeywordResp(m.Content); exist {
+			s.ChannelMessageSend(m.ChannelID, authorTag+" "+resp)
+		} else {
+			return
+		}
 	}
 
+	var dbgMsg string = "<" + m.ChannelID + ">" + m.Author.ID + ": " + m.Content
+	// Deal with cmd
 	cmdAndArgs := strings.Split(m.Content, " ")
 	if cmdAndArgs[0] == "ping" {
-		logger.Logger.WithField("type", "msg").Debug("<", m.ChannelID, ">", m.Author.ID, ": ", m.Content)
+		// "ping" cmd
+		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
 
-		s.ChannelMessageSend(m.ChannelID, "<@!"+m.Author.ID+"> "+"Pong!")
+		s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Pong!")
+	} else if cmdAndArgs[0] == "set" {
+		// "set" cmd
+		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
+
+		if len(cmdAndArgs) != 3 {
+			logger.Logger.WithField("type", "msg").Debug("Num of args is not correct")
+			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Usage: set [keyword] [response]")
+			return
+		}
+
+		if duplicate := msgresponder.SetKeywordResp(cmdAndArgs[1], cmdAndArgs[2]); duplicate {
+			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Duplication detected! Overwrite old one")
+		} else {
+			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Success!")
+		}
 	}
 }
