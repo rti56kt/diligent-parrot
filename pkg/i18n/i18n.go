@@ -1,6 +1,8 @@
 package i18n
 
 import (
+	"sort"
+
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
 
 	"github.com/bwmarrin/discordgo"
@@ -22,6 +24,7 @@ func getAllLocale() []string {
 	for k := range AllLocale {
 		allSupportedLocale = append(allSupportedLocale, k)
 	}
+	sort.Strings(allSupportedLocale)
 	return allSupportedLocale
 }
 
