@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/rti56kt/diligent-parrot/pkg/i18n"
+	"github.com/rti56kt/diligent-parrot/pkg/ifconfigme"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
 	"github.com/rti56kt/diligent-parrot/pkg/msgresponder"
 
@@ -111,7 +112,12 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if cmdAndArgs[0] == "ping" {
 		// "ping" cmd
 		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-		resp := authorTag + " " + "Pong!"
+		resp := authorTag + " " + i18n.AllLocale[i18n.GetCurrentLocale()].PING.PONG
+		s.ChannelMessageSend(m.ChannelID, resp)
+	} else if cmdAndArgs[0] == "ifconfigme" {
+		// "ifconfigme" cmd
+		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
+		resp := ifconfigme.Dealer(authorTag, cmdAndArgs)
 		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "set" {
 		// "set" cmd
