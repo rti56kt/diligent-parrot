@@ -1,6 +1,7 @@
 package msgresponder
 
 import (
+	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
 )
 
@@ -21,7 +22,7 @@ func GetKeywordResp(keyword string) (string, bool) {
 }
 
 // Set new response for keyword. If there's already a mapping return true, else return false.
-func SetKeywordResp(keyword string, resp string) bool {
+func setKeywordResp(keyword string, resp string) bool {
 	logger.Logger.WithField("type", "msgresper").Debug("keyword: ", keyword, "; resp: ", resp)
 	if _, exist := keywords[keyword]; exist {
 		keywords[keyword] = resp
@@ -29,5 +30,19 @@ func SetKeywordResp(keyword string, resp string) bool {
 	} else {
 		keywords[keyword] = resp
 		return false
+	}
+}
+
+func Dealer(authorTag string, cmdAndArgs []string) string {
+	var locale string = i18n.GetCurrentLocale()
+	if len(cmdAndArgs) != 3 {
+		logger.Logger.WithField("type", "msg").Debug("Num of args is not correct")
+		return authorTag + " " + i18n.AllLocale[locale].SET.USAGE
+	}
+
+	if duplicate := setKeywordResp(cmdAndArgs[1], cmdAndArgs[2]); duplicate {
+		return authorTag + " " + i18n.AllLocale[locale].SET.DUP
+	} else {
+		return authorTag + " " + i18n.AllLocale[locale].SET.SUCCESS
 	}
 }

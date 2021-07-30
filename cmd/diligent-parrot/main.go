@@ -111,23 +111,13 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	if cmdAndArgs[0] == "ping" {
 		// "ping" cmd
 		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-
-		s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Pong!")
+		resp := authorTag + " " + "Pong!"
+		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "set" {
 		// "set" cmd
 		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-
-		if len(cmdAndArgs) != 3 {
-			logger.Logger.WithField("type", "msg").Debug("Num of args is not correct")
-			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Usage: set [keyword] [response]")
-			return
-		}
-
-		if duplicate := msgresponder.SetKeywordResp(cmdAndArgs[1], cmdAndArgs[2]); duplicate {
-			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Duplication detected! Overwrite old one")
-		} else {
-			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Success!")
-		}
+		resp := msgresponder.Dealer(authorTag, cmdAndArgs)
+		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "locale" {
 		// "locale" cmd
 		logger.Logger.WithField("type", "msg").Debug(dbgMsg)

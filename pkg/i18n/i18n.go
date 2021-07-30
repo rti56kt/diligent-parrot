@@ -25,19 +25,19 @@ func getAllLocale() []string {
 	return allSupportedLocale
 }
 
-func getCurrentLocale() string {
+func GetCurrentLocale() string {
 	return curLocale
 }
 
 func Dealer(authorTag string, cmdAndArgs []string) discordgo.MessageSend {
 	var respMsg discordgo.MessageSend
-	var locale string = getCurrentLocale()
+	var locale string = GetCurrentLocale()
 
 	if len(cmdAndArgs) == 1 {
 		respMsg.Content = authorTag + " " + AllLocale[locale].LOCALE.CURRENT + "\"" + locale + "\""
 	} else if len(cmdAndArgs) == 2 {
 		if exist := setLocale(cmdAndArgs[1]); exist {
-			locale = getCurrentLocale()
+			locale = GetCurrentLocale()
 			respMsg.Content = authorTag + " " + AllLocale[locale].LOCALE.SUCCESS + "\"" + locale + "\""
 		} else {
 			var msgEmbed discordgo.MessageEmbed
