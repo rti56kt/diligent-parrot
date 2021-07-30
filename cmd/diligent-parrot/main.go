@@ -8,6 +8,7 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
 	"github.com/rti56kt/diligent-parrot/pkg/msgresponder"
 
@@ -127,5 +128,10 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		} else {
 			s.ChannelMessageSend(m.ChannelID, authorTag+" "+"Success!")
 		}
+	} else if cmdAndArgs[0] == "locale" {
+		// "locale" cmd
+		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
+		resp := i18n.Dealer(authorTag, cmdAndArgs)
+		s.ChannelMessageSendComplex(m.ChannelID, &resp)
 	}
 }
