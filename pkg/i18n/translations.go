@@ -18,6 +18,11 @@ var AllLocale = map[string]cmd{
 			FAIL:      "Fail! The language you specified is not supported yet",
 			SUPPORTED: "Currently supported languages list",
 		},
+		prefix{
+			USAGE:   "Usage: prefix [newPrefix]",
+			SUCCESS: "Success!",
+			FAIL:    "Fail! Make sure you are the owner or admin of the guild",
+		},
 	},
 	"zh-tw": {
 		"繁體中文(台灣)",
@@ -35,6 +40,11 @@ var AllLocale = map[string]cmd{
 			CURRENT:   "目前語言為",
 			FAIL:      "失敗! 您所指定的新語言目前並未支援",
 			SUPPORTED: "目前有支援的語言清單",
+		},
+		prefix{
+			USAGE:   "使用方式: prefix [新命令字首]",
+			SUCCESS: "成功!",
+			FAIL:    "失敗! 你必須是伺服器擁有者或是管理員",
 		},
 	},
 }

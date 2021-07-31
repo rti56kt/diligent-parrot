@@ -97,7 +97,7 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 	// Detect prefix to determine if the msg is a cmd
 	prefix := cmdprefix.GetPrefix()
 	if strings.HasPrefix(m.Content, prefix) {
-		msgparser.CmdPreprocess(m)
+		msgparser.CmdPreprocess(m, prefix)
 	} else {
 		if resp, exist := msgresponder.GetKeywordResp(m.Content); exist {
 			resp = msgparser.GetAuthorTag(m) + " " + resp
@@ -128,5 +128,9 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		// "locale" cmd
 		resp := i18n.Dealer(m)
 		s.ChannelMessageSendComplex(m.ChannelID, &resp)
+	} else if cmdAndArgs[0] == "prefix" {
+		// "prefix" cmd
+		resp := cmdprefix.Dealer(s, m)
+		s.ChannelMessageSend(m.ChannelID, resp)
 	}
 }

@@ -18,9 +18,16 @@ type locale struct {
 	SUPPORTED string
 }
 
+type prefix struct {
+	USAGE   string
+	SUCCESS string
+	FAIL    string
+}
+
 type cmd struct {
 	NAME   string
 	PING   ping
 	SET    set
 	LOCALE locale
+	PREFIX prefix
 }
