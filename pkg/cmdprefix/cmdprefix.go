@@ -1,6 +1,7 @@
 package cmdprefix
 
 import (
+	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
 	"github.com/rti56kt/diligent-parrot/pkg/msgparser"
 
@@ -21,6 +22,7 @@ func setPrefix(newPrefix string) {
 
 func Dealer(s *discordgo.Session, m *discordgo.MessageCreate) string {
 	logger.Logger.WithField("type", "cmdprefix").Info("cmdprefix dealer triggered")
+	locale := i18n.GetCurrentLocale()
 	cmdAndArgs := msgparser.GetCmdAndArgs(m)
 
 	if len(cmdAndArgs) == 1 {
@@ -28,11 +30,11 @@ func Dealer(s *discordgo.Session, m *discordgo.MessageCreate) string {
 	} else if len(cmdAndArgs) == 2 {
 		if msgparser.IsAuthorAdmin(s, m) || msgparser.IsAuthorOwner(s, m) {
 			setPrefix(cmdAndArgs[1])
-			return "Success"
+			return i18n.AllLocale[locale].PREFIX.SUCCESS
 		} else {
-			return "401"
+			return i18n.AllLocale[locale].PREFIX.FAIL
 		}
 	} else {
-		return "Usage"
+		return i18n.AllLocale[locale].PREFIX.USAGE
 	}
 }
