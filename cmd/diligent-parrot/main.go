@@ -8,7 +8,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/rti56kt/diligent-parrot/pkg/cmdlist"
 	"github.com/rti56kt/diligent-parrot/pkg/cmdprefix"
+	"github.com/rti56kt/diligent-parrot/pkg/helper"
 	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/ifconfigme"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
@@ -112,23 +114,27 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	// Deal with cmd
 	cmdAndArgs := msgparser.GetCmdAndArgs(m)
-	if cmdAndArgs[0] == "ping" {
+	if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Ping) {
 		// "ping" cmd
 		resp := msgparser.GetAuthorTag(m) + " " + i18n.AllLocale[i18n.GetCurrentLocale()].PING.PONG
 		s.ChannelMessageSend(m.ChannelID, resp)
-	} else if cmdAndArgs[0] == "ifconfigme" {
+	} else if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Ifconfigme) {
 		// "ifconfigme" cmd
 		resp := ifconfigme.Dealer()
 		s.ChannelMessageSend(m.ChannelID, resp)
-	} else if cmdAndArgs[0] == "set" {
+	} else if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Help) {
+		// "help" cmd
+		resp := helper.Dealer()
+		s.ChannelMessageSendEmbed(m.ChannelID, &resp)
+	} else if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Set) {
 		// "set" cmd
 		resp := msgresponder.Dealer(m)
 		s.ChannelMessageSend(m.ChannelID, resp)
-	} else if cmdAndArgs[0] == "locale" {
+	} else if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Locale) {
 		// "locale" cmd
 		resp := i18n.Dealer(m)
 		s.ChannelMessageSendComplex(m.ChannelID, &resp)
-	} else if cmdAndArgs[0] == "prefix" {
+	} else if cmdlist.CheckCmdByFullName(cmdAndArgs[0], cmdlist.Prefix) {
 		// "prefix" cmd
 		resp := cmdprefix.Dealer(s, m)
 		s.ChannelMessageSend(m.ChannelID, resp)
