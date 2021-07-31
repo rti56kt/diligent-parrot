@@ -3,9 +3,14 @@ package msgresponder
 import (
 	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
+	"github.com/rti56kt/diligent-parrot/pkg/msgparser"
+
+	"github.com/bwmarrin/discordgo"
 )
 
-var keywords = make(map[string]string)
+var (
+	keywords = make(map[string]string)
+)
 
 // Search if the keyword is already exist.
 //
@@ -33,16 +38,20 @@ func setKeywordResp(keyword string, resp string) bool {
 	}
 }
 
-func Dealer(authorTag string, cmdAndArgs []string) string {
-	var locale string = i18n.GetCurrentLocale()
-	if len(cmdAndArgs) != 3 {
-		logger.Logger.WithField("type", "msg").Debug("Num of args is not correct")
-		return authorTag + " " + i18n.AllLocale[locale].SET.USAGE
-	}
+func Dealer(m *discordgo.MessageCreate) string {
+	logger.Logger.WithField("type", "msgresper").Info("msgresper dealer triggered")
+	locale := i18n.GetCurrentLocale()
+	authorTag := msgparser.GetAuthorTag(m)
+	cmdAndArgs := msgparser.GetCmdAndArgs(m)
 
-	if duplicate := setKeywordResp(cmdAndArgs[1], cmdAndArgs[2]); duplicate {
-		return authorTag + " " + i18n.AllLocale[locale].SET.DUP
+	if len(cmdAndArgs) == 3 {
+		if duplicate := setKeywordResp(cmdAndArgs[1], cmdAndArgs[2]); duplicate {
+			return authorTag + " " + i18n.AllLocale[locale].SET.DUP
+		} else {
+			return authorTag + " " + i18n.AllLocale[locale].SET.SUCCESS
+		}
 	} else {
-		return authorTag + " " + i18n.AllLocale[locale].SET.SUCCESS
+		logger.Logger.WithField("type", "msgresper").Debug("Num of args is not correct")
+		return authorTag + " " + i18n.AllLocale[locale].SET.USAGE
 	}
 }

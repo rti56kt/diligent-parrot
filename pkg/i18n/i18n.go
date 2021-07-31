@@ -4,6 +4,7 @@ import (
 	"sort"
 
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
+	"github.com/rti56kt/diligent-parrot/pkg/msgparser"
 
 	"github.com/bwmarrin/discordgo"
 )
@@ -32,13 +33,18 @@ func GetCurrentLocale() string {
 	return curLocale
 }
 
-func Dealer(authorTag string, cmdAndArgs []string) discordgo.MessageSend {
+func Dealer(m *discordgo.MessageCreate) discordgo.MessageSend {
+	logger.Logger.WithField("type", "i18n").Info("i18n dealer triggered")
 	var respMsg discordgo.MessageSend
-	var locale string = GetCurrentLocale()
+	locale := GetCurrentLocale()
+	authorTag := msgparser.GetAuthorTag(m)
+	cmdAndArgs := msgparser.GetCmdAndArgs(m)
 
 	if len(cmdAndArgs) == 1 {
+		logger.Logger.WithField("type", "i18n").Debug("current locale: ", locale)
 		respMsg.Content = authorTag + " " + AllLocale[locale].LOCALE.CURRENT + "\"" + locale + "\""
 	} else if len(cmdAndArgs) == 2 {
+		logger.Logger.WithField("type", "i18n").Debug("set new locale: ", locale)
 		if exist := setLocale(cmdAndArgs[1]); exist {
 			locale = GetCurrentLocale()
 			respMsg.Content = authorTag + " " + AllLocale[locale].LOCALE.SUCCESS + "\"" + locale + "\""
@@ -61,7 +67,7 @@ func Dealer(authorTag string, cmdAndArgs []string) discordgo.MessageSend {
 			respMsg.Embed = &msgEmbed
 		}
 	} else {
-		logger.Logger.WithField("type", "msg").Debug("Num of args is not correct")
+		logger.Logger.WithField("type", "i18n").Debug("Num of args is not correct")
 		respMsg.Content = authorTag + " " + AllLocale[locale].LOCALE.USAGE
 	}
 	return respMsg

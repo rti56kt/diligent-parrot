@@ -8,9 +8,11 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/rti56kt/diligent-parrot/pkg/cmdprefix"
 	"github.com/rti56kt/diligent-parrot/pkg/i18n"
 	"github.com/rti56kt/diligent-parrot/pkg/ifconfigme"
 	"github.com/rti56kt/diligent-parrot/pkg/logger"
+	"github.com/rti56kt/diligent-parrot/pkg/msgparser"
 	"github.com/rti56kt/diligent-parrot/pkg/msgresponder"
 
 	"github.com/bwmarrin/discordgo"
@@ -92,42 +94,39 @@ func messageCreate(s *discordgo.Session, m *discordgo.MessageCreate) {
 		return
 	}
 
-	var prefix string = "$"
-	var authorTag string = "<@!" + m.Author.ID + ">"
 	// Detect prefix to determine if the msg is a cmd
-	m.Content = strings.ToLower(m.Content)
+	prefix := cmdprefix.GetPrefix()
 	if strings.HasPrefix(m.Content, prefix) {
-		m.Content = strings.TrimPrefix(m.Content, prefix)
+		msgparser.CmdPreprocess(m)
 	} else {
 		if resp, exist := msgresponder.GetKeywordResp(m.Content); exist {
-			s.ChannelMessageSend(m.ChannelID, authorTag+" "+resp)
+			resp = msgparser.GetAuthorTag(m) + " " + resp
+			s.ChannelMessageSend(m.ChannelID, resp)
 		} else {
 			return
 		}
 	}
 
-	var dbgMsg string = "<" + m.ChannelID + ">" + m.Author.ID + ": " + m.Content
+	dbgMsg := msgparser.GetCmdDetail(m)
+	logger.Logger.WithField("type", "msg").Debug(dbgMsg)
+
 	// Deal with cmd
-	cmdAndArgs := strings.Split(m.Content, " ")
+	cmdAndArgs := msgparser.GetCmdAndArgs(m)
 	if cmdAndArgs[0] == "ping" {
 		// "ping" cmd
-		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-		resp := authorTag + " " + i18n.AllLocale[i18n.GetCurrentLocale()].PING.PONG
+		resp := msgparser.GetAuthorTag(m) + " " + i18n.AllLocale[i18n.GetCurrentLocale()].PING.PONG
 		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "ifconfigme" {
 		// "ifconfigme" cmd
-		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-		resp := ifconfigme.Dealer(authorTag, cmdAndArgs)
+		resp := ifconfigme.Dealer()
 		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "set" {
 		// "set" cmd
-		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-		resp := msgresponder.Dealer(authorTag, cmdAndArgs)
+		resp := msgresponder.Dealer(m)
 		s.ChannelMessageSend(m.ChannelID, resp)
 	} else if cmdAndArgs[0] == "locale" {
 		// "locale" cmd
-		logger.Logger.WithField("type", "msg").Debug(dbgMsg)
-		resp := i18n.Dealer(authorTag, cmdAndArgs)
+		resp := i18n.Dealer(m)
 		s.ChannelMessageSendComplex(m.ChannelID, &resp)
 	}
 }
